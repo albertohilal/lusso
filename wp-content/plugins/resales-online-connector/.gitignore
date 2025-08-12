@@ -1,0 +1,30 @@
+# Plugin Resales Online - WordPress
+
+## Archivos del plugin
+*.log
+*.tmp
+*.cache
+
+# WordPress
+wp-config.php
+wp-content/uploads/
+wp-content/cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Node modules si los usamos en el futuro
+node_modules/
+package-lock.json
+
+# Archivos de backup
+*.bak
+*.backup
+*~
