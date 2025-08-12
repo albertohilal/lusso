@@ -20,7 +20,7 @@
             <label for="agency_filter">Tipo de Operación</label>
             <select id="agency_filter" name="agency_filter" aria-describedby="agency_filter_desc">
                 <option value="">Todas las operaciones</option>
-                <option value="ventas" <?php selected($_GET['agency_filter'] ?? '', 'ventas'); ?>>Venta</option>
+                <option value="venta" <?php selected($_GET['agency_filter'] ?? '', 'venta'); ?>>Venta</option>
                 <option value="alquiler_largo" <?php selected($_GET['agency_filter'] ?? '', 'alquiler_largo'); ?>>Alquiler largo plazo</option>
                 <option value="alquiler_corto" <?php selected($_GET['agency_filter'] ?? '', 'alquiler_corto'); ?>>Alquiler corto plazo</option>
                 <option value="destacados" <?php selected($_GET['agency_filter'] ?? '', 'destacados'); ?>>Propiedades destacadas</option>
