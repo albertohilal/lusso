@@ -17,13 +17,13 @@
         </div>
         
         <div class="field-group">
-            <label for="agency_filter">Tipo de Operación</label>
-            <select id="agency_filter" name="agency_filter" aria-describedby="agency_filter_desc">
+            <label for="operacion">Tipo de Operación</label>
+            <select id="operacion" name="operacion" aria-describedby="operacion_desc">
                 <option value="">Todas las operaciones</option>
-                <option value="venta" <?php selected($_GET['agency_filter'] ?? '', 'venta'); ?>>Venta</option>
-                <option value="alquiler_largo" <?php selected($_GET['agency_filter'] ?? '', 'alquiler_largo'); ?>>Alquiler largo plazo</option>
-                <option value="alquiler_corto" <?php selected($_GET['agency_filter'] ?? '', 'alquiler_corto'); ?>>Alquiler corto plazo</option>
-                <option value="destacados" <?php selected($_GET['agency_filter'] ?? '', 'destacados'); ?>>Propiedades destacadas</option>
+                <option value="venta" <?php selected($_GET['operacion'] ?? '', 'venta'); ?>>Venta</option>
+                <option value="alquiler_largo" <?php selected($_GET['operacion'] ?? '', 'alquiler_largo'); ?>>Alquiler largo plazo</option>
+                <option value="alquiler_corto" <?php selected($_GET['operacion'] ?? '', 'alquiler_corto'); ?>>Alquiler corto plazo</option>
+                <option value="destacados" <?php selected($_GET['operacion'] ?? '', 'destacados'); ?>>Propiedades destacadas</option>
             </select>
         </div>
         
