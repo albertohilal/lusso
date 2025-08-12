@@ -30,8 +30,44 @@ class ResalesElementorIntegration {
         jQuery(document).ready(function($) {
             console.log('🔍 Resales Online: Integrando con formulario de Elementor');
             
-            // Buscar el botón de búsqueda en Elementor
-            const searchButton = $('a[href*="BUSCAR"], button:contains("BUSCAR"), .elementor-button:contains("BUSCAR")');
+            // DEBUG: Mostrar todos los selects en la página
+            const allSelects = $('select');
+            console.log('🔍 DEBUG: Total selects en página:', allSelects.length);
+            allSelects.each(function(i) {
+                const sel = $(this);
+                console.log(`Select ${i+1}:`, {
+                    id: sel.attr('id'),
+                    class: sel.attr('class'),
+                    options: sel.find('option').map(function() { return $(this).text(); }).get()
+                });
+            });
+            
+            // Buscar el botón de búsqueda con múltiples selectores
+            let searchButton = $('a[href*="BUSCAR"], button:contains("BUSCAR"), .elementor-button:contains("BUSCAR")');
+            
+            // Si no encuentra con :contains, probar con texto exacto
+            if (searchButton.length === 0) {
+                searchButton = $('a, button, .elementor-button').filter(function() {
+                    return $(this).text().trim().toUpperCase().includes('BUSCAR');
+                });
+            }
+            
+            // Si aún no encuentra, buscar por clases comunes de Elementor
+            if (searchButton.length === 0) {
+                searchButton = $('.elementor-button-link, .elementor-button-text, button[type="submit"]');
+                console.log('🔍 Intentando con selectores de Elementor:', searchButton.length);
+            }
+            
+            // Si aún no encuentra, buscar cualquier elemento con "buscar" en el texto
+            if (searchButton.length === 0) {
+                searchButton = $('*').filter(function() {
+                    const text = $(this).text().trim().toLowerCase();
+                    return text === 'buscar' && $(this).is('a, button, span, div');
+                });
+                console.log('🔍 Búsqueda por texto genérico:', searchButton.length);
+            }
+            
+            console.log('🔍 Botones encontrados:', searchButton.length, searchButton);
             
             if (searchButton.length > 0) {
                 console.log('✅ Botón de búsqueda encontrado');
@@ -39,11 +75,21 @@ class ResalesElementorIntegration {
                 // Convertir link en botón funcional
                 searchButton.off('click').on('click', function(e) {
                     e.preventDefault();
+                    console.log('🚀 Click en botón BUSCAR detectado');
                     handleElementorSearch();
                 });
                 
                 // Cambiar cursor para indicar que es clickeable
                 searchButton.css('cursor', 'pointer');
+            } else {
+                console.log('❌ No se encontró botón BUSCAR');
+                console.log('🔍 Buscando manualmente todos los elementos con texto...');
+                $('a, button, span, div').each(function() {
+                    const text = $(this).text().trim();
+                    if (text.toLowerCase().includes('buscar')) {
+                        console.log('📍 Encontrado elemento con "buscar":', this, text);
+                    }
+                });
             }
             
             /**
@@ -92,41 +138,72 @@ class ResalesElementorIntegration {
             function getElementorFormValues() {
                 const params = {};
                 
-                // Buscar campos por placeholder o label
+                // Buscar campo de ubicación por placeholder
                 const locationField = $('input[placeholder*="Málaga"], input[placeholder*="ubicación"], input[placeholder*="Ubicación"]');
                 if (locationField.length > 0 && locationField.val()) {
                     params.location = locationField.val();
+                    console.log('📍 Ubicación encontrada:', params.location);
                 }
                 
-                // Buscar selects por contenido o posición
+                // Buscar todos los selects y analizarlos individualmente
                 const selects = $('.elementor-field-group select, .elementor-widget select');
+                console.log('🔍 Total de selects encontrados:', selects.length);
+                
                 selects.each(function(index) {
                     const select = $(this);
                     const value = select.val();
+                    const selectedText = select.find('option:selected').text();
                     
-                    if (value && value !== '') {
-                        // Identificar tipo de select por posición o opciones
+                    console.log(`Select ${index + 1}:`, {
+                        value: value,
+                        selectedText: selectedText,
+                        allOptions: select.find('option').map(function() { return $(this).text(); }).get()
+                    });
+                    
+                    if (value && value !== '' && selectedText !== 'Seleccionar...') {
+                        // Obtener todas las opciones del select
                         const options = select.find('option').map(function() {
                             return $(this).text().toLowerCase();
                         }).get().join(' ');
                         
-                        if (options.includes('villa') || options.includes('apartamento')) {
+                        // Detectar TIPO DE OPERACIÓN (Venta, Alquiler, etc.)
+                        if (options.includes('venta') || options.includes('alquiler') || 
+                            options.includes('todas las operaciones') || options.includes('operacion') ||
+                            selectedText.toLowerCase().includes('venta') || 
+                            selectedText.toLowerCase().includes('alquiler')) {
+                            params.agency_filter = mapOperationType(selectedText);
+                            console.log('💼 Tipo de operación:', selectedText, '→', params.agency_filter);
+                        }
+                        // Detectar TIPO DE PROPIEDAD (Villa, Apartamento, etc.)
+                        else if (options.includes('villa') || options.includes('apartamento') || 
+                                options.includes('casa') || options.includes('piso') ||
+                                selectedText.toLowerCase().includes('villa') || 
+                                selectedText.toLowerCase().includes('apartamento')) {
                             params.property_type = value;
-                        } else if (options.includes('venta') || options.includes('alquiler')) {
-                            params.agency_filter = mapOperationType(value);
-                        } else if (options.includes('dormitorio') || options.includes('habitacion')) {
+                            console.log('🏠 Tipo de propiedad:', selectedText);
+                        }
+                        // Detectar DORMITORIOS
+                        else if (options.includes('dormitorio') || options.includes('habitacion') ||
+                                options.includes('bedroom') || /\d+\s*(dorm|hab|bed)/i.test(options)) {
                             params.bedrooms = value;
-                        } else if (options.includes('€') || options.includes('euro') || options.includes('precio')) {
-                            if (index < selects.length / 2) {
+                            console.log('🛏️ Dormitorios:', selectedText);
+                        }
+                        // Detectar PRECIOS (€, euro, precio)
+                        else if (options.includes('€') || options.includes('euro') || 
+                                options.includes('precio') || /\d+\.?\d*\s*(€|euro)/i.test(options)) {
+                            // Determinar si es precio mínimo o máximo por la posición
+                            if (!params.min_price) {
                                 params.min_price = value;
+                                console.log('💰 Precio mínimo:', selectedText);
                             } else {
                                 params.max_price = value;
+                                console.log('💰 Precio máximo:', selectedText);
                             }
                         }
                     }
                 });
                 
-                console.log('📝 Parámetros de búsqueda:', params);
+                console.log('📝 Parámetros finales de búsqueda:', params);
                 return params;
             }
             
@@ -134,13 +211,27 @@ class ResalesElementorIntegration {
              * Mapear tipos de operación
              */
             function mapOperationType(value) {
+                const lowerValue = value.toLowerCase().trim();
+                
                 const mapping = {
                     'venta': 'ventas',
-                    'alquiler largo': 'alquiler_largo', 
+                    'ventas': 'ventas',
+                    'sale': 'ventas',
+                    'for sale': 'ventas',
+                    'alquiler largo': 'alquiler_largo',
+                    'alquiler largo plazo': 'alquiler_largo', 
+                    'long term rental': 'alquiler_largo',
                     'alquiler corto': 'alquiler_corto',
-                    'destacados': 'destacados'
+                    'alquiler corto plazo': 'alquiler_corto',
+                    'short term rental': 'alquiler_corto',
+                    'vacation rental': 'alquiler_corto',
+                    'destacados': 'destacados',
+                    'featured': 'destacados'
                 };
-                return mapping[value.toLowerCase()] || 'ventas';
+                
+                const result = mapping[lowerValue] || 'ventas';
+                console.log('🔄 Mapeando operación:', value, '→', result);
+                return result;
             }
             
             /**
