@@ -391,12 +391,12 @@ class ResalesOnlineConnector {
                     <h2>Resales Online API Settings</h2>
                     <table class="form-table">
                         <tr valign="top">
-                            <th scope="row">Contact ID</th>
-                            <td><input type="text" name="resales_online_contact_id" value="<?php echo esc_attr(get_option('resales_online_contact_id')); ?>" size="50" /></td>
+                            <th scope="row">Contact ID (P1)</th>
+                            <td><input type="text" name="resales_online_contact_id" value="<?php echo esc_attr(get_option('resales_online_contact_id')); ?>" size="50" placeholder="Introduce tu Contact ID" /></td>
                         </tr>
                         <tr valign="top">
-                            <th scope="row">API Key</th>
-                            <td><input type="text" name="resales_online_api_key" value="<?php echo esc_attr(get_option('resales_online_api_key')); ?>" size="50" /></td>
+                            <th scope="row">API Key (P2)</th>
+                            <td><input type="text" name="resales_online_api_key" value="<?php echo esc_attr(get_option('resales_online_api_key')); ?>" size="50" placeholder="Introduce tu API Key" /></td>
                         </tr>
                         <tr valign="top">
                             <th scope="row">Modo Demo</th>
@@ -415,7 +415,6 @@ class ResalesOnlineConnector {
             echo '<strong>Error:</strong> ' . $properties->get_error_message();
         } else {
             echo '<strong>Respuesta exitosa</strong><br>';
-                    'P1' => $this->agency_contact_id,
             echo '<pre>' . json_encode($properties, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . '</pre>';
         }
         echo '</div>';
@@ -480,8 +479,9 @@ class ResalesOnlineConnector {
      * Inicializar configuraciones
      */
     public function settings_init() {
-        register_setting('resales_online', 'resales_online_api_key');
-        register_setting('resales_online', 'resales_online_demo_mode');
+    register_setting('resales_online', 'resales_online_api_key');
+    register_setting('resales_online', 'resales_online_contact_id');
+    register_setting('resales_online', 'resales_online_demo_mode');
         
         add_settings_section(
             'resales_online_settings_section',
@@ -491,12 +491,24 @@ class ResalesOnlineConnector {
         );
         
         add_settings_field(
+            'resales_online_contact_id',
+            'Contact ID (P1)',
+            array($this, 'contact_id_render'),
+            'resales_online',
+            'resales_online_settings_section'
+        );
+        add_settings_field(
             'resales_online_api_key',
-            'API Key',
+            'API Key (P2)',
             array($this, 'api_key_render'),
             'resales_online',
             'resales_online_settings_section'
         );
+    public function contact_id_render() {
+        $contact_id = get_option('resales_online_contact_id');
+        echo '<input type="text" name="resales_online_contact_id" value="' . esc_attr($contact_id) . '" size="50" placeholder="Introduce tu Contact ID" />';
+        echo '<p class="description">Introduce el Identificador de Contacto (P1) proporcionado por Resales Online.</p>';
+    }
         
         add_settings_field(
             'resales_online_demo_mode',
