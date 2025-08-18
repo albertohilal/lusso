@@ -348,7 +348,7 @@ class ResalesOnlineConnector {
         <style>
         .resales-properties-banner {
             text-align: center;
-            padding: 5rem 2rem;
+            private $agency_contact_id;
             background: linear-gradient(135deg, rgba(26, 26, 26, 0.05) 0%, rgba(26, 26, 26, 0.02) 100%);
             margin-bottom: 4rem;
         }
@@ -364,12 +364,14 @@ class ResalesOnlineConnector {
         }
         
         .banner-subtitle {
-            font-size: 1.2rem;
+                // Obtener la API key y el Contact ID desde las opciones
             color: #666666;
+                $this->agency_contact_id = get_option('resales_online_contact_id');
             font-weight: 300;
             line-height: 1.6;
             max-width: 700px;
             margin: 0 auto;
+                register_setting('resales_online', 'resales_online_contact_id');
         }
         
         @media (max-width: 768px) {
@@ -386,31 +388,34 @@ class ResalesOnlineConnector {
             }
         }
         </style>
-        <?php
-        return ob_get_clean();
-    }
-    
-    /**
-     * Shortcode para debug de la API (temporal)
-     */
-    public function debug_api_shortcode($atts) {
-        if (!current_user_can('manage_options')) {
-            return '<p>Acceso denegado.</p>';
-        }
-        
-        $properties = $this->fetch_properties(array('P_PageSize' => 1));
-        
-        ob_start();
-        echo '<div style="background: #f1f1f1; padding: 20px; border: 1px solid #ddd; margin: 20px 0;">';
-        echo '<h3>Debug API Resales Online</h3>';
-        echo '<strong>API Key configurada:</strong> ' . (empty($this->api_key) ? 'NO' : 'SÍ') . '<br>';
-        echo '<strong>URL API:</strong> ' . $this->api_url . '<br><br>';
-        
+                    <h2>Resales Online API Settings</h2>
+                    <table class="form-table">
+                        <tr valign="top">
+                            <th scope="row">Contact ID</th>
+                            <td><input type="text" name="resales_online_contact_id" value="<?php echo esc_attr(get_option('resales_online_contact_id')); ?>" size="50" /></td>
+                        </tr>
+                        <tr valign="top">
+                            <th scope="row">API Key</th>
+                            <td><input type="text" name="resales_online_api_key" value="<?php echo esc_attr(get_option('resales_online_api_key')); ?>" size="50" /></td>
+                        </tr>
+                        <tr valign="top">
+                            <th scope="row">Modo Demo</th>
+                            <td>
+                                <select name="resales_online_demo_mode">
+                                    <option value="auto" <?php selected(get_option('resales_online_demo_mode'), 'auto'); ?>>Automático</option>
+                                    <option value="demo" <?php selected(get_option('resales_online_demo_mode'), 'demo'); ?>>Solo demo</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+                    <?php submit_button(); ?>
+                </form>
+                <?php
         if (is_wp_error($properties)) {
             echo '<strong>Error:</strong> ' . $properties->get_error_message();
         } else {
             echo '<strong>Respuesta exitosa</strong><br>';
-            echo '<strong>Datos recibidos:</strong><br>';
+                    'P1' => $this->agency_contact_id,
             echo '<pre>' . json_encode($properties, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . '</pre>';
         }
         echo '</div>';
