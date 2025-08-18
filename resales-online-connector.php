@@ -479,9 +479,9 @@ class ResalesOnlineConnector {
      * Inicializar configuraciones
      */
     public function settings_init() {
-    register_setting('resales_online', 'resales_online_api_key');
-    register_setting('resales_online', 'resales_online_contact_id');
-    register_setting('resales_online', 'resales_online_demo_mode');
+        register_setting('resales_online', 'resales_online_api_key');
+        register_setting('resales_online', 'resales_online_contact_id');
+        register_setting('resales_online', 'resales_online_demo_mode');
         
         add_settings_section(
             'resales_online_settings_section',
@@ -504,11 +504,6 @@ class ResalesOnlineConnector {
             'resales_online',
             'resales_online_settings_section'
         );
-    public function contact_id_render() {
-        $contact_id = get_option('resales_online_contact_id');
-        echo '<input type="text" name="resales_online_contact_id" value="' . esc_attr($contact_id) . '" size="50" placeholder="Introduce tu Contact ID" />';
-        echo '<p class="description">Introduce el Identificador de Contacto (P1) proporcionado por Resales Online.</p>';
-    }
         
         add_settings_field(
             'resales_online_demo_mode',
@@ -517,6 +512,12 @@ class ResalesOnlineConnector {
             'resales_online',
             'resales_online_settings_section'
         );
+    }
+
+    public function contact_id_render() {
+        $contact_id = get_option('resales_online_contact_id');
+        echo '<input type="text" name="resales_online_contact_id" value="' . esc_attr($contact_id) . '" size="50" placeholder="Introduce tu Contact ID" />';
+        echo '<p class="description">Introduce el Identificador de Contacto (P1) proporcionado por Resales Online.</p>';
     }
     
     public function api_key_render() {
