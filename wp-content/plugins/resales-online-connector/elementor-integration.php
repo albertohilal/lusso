@@ -547,7 +547,7 @@ class ResalesElementorIntegration {
      */
     private function render_property_card($property) {
         $price = number_format($property['Price'], 0, ',', '.');
-        $location = $property['Location'] . ', ' . $property['Province'];
+    $location = (isset($property['Location']) ? $property['Location'] : (isset($property['Town']) ? $property['Town'] : '')) . ', ' . (isset($property['Province']) ? $property['Province'] : '');
         $image = $property['MainImage'] ?? 'https://via.placeholder.com/400x300/1a1a1a/ffffff?text=' . urlencode($property['PropertyType']);
         
         ?>
@@ -592,7 +592,7 @@ class ResalesElementorIntegration {
                     <span>🛁 <?php echo $property['Bathrooms']; ?></span>
                     <?php endif; ?>
                     
-                    <?php if ($property['BuiltArea']): ?>
+                    <?php if (isset($property['BuiltArea']) && $property['BuiltArea']): ?>
                     <span>📐 <?php echo $property['BuiltArea']; ?>m²</span>
                     <?php endif; ?>
                 </div>
